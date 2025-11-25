@@ -61,6 +61,35 @@ header p {
     opacity: 0.9;
 }
 
+.animal-toggle {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.toggle-btn {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #ffffff;
+    border: 2px solid #4a90e2;
+    padding: 8px 20px;
+    font-size: 0.9em;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+    box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
+}
+
+.toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.5);
+    background: linear-gradient(135deg, #5ba0f2 0%, #458acd 100%);
+}
+
+.toggle-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(74, 144, 226, 0.3);
+}
+
 main {
     display: flex;
     flex-direction: column;

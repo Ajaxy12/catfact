@@ -3,32 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatFacts</title>
+    <title>Cat & Dog Facts</title>
     <link rel="stylesheet" type="text/css" href="app.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🐱 Cat Facts</h1>
-            <p>Discover amazing facts about cats!</p>
+            <h1 id="header-title">🐱 Cat Facts</h1>
+            <p id="header-subtitle">Discover amazing facts about cats!</p>
+            <div class="animal-toggle">
+                <button id="toggle-animal" class="toggle-btn">
+                    <span id="toggle-text">Switch to 🐶 Dog Facts</span>
+                </button>
+            </div>
         </header>
         
         <main>
             <div class="image-container">
-                <div id="image-loading" class="loading">Loading cat image...</div>
-                <img id="cat-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="Random cat" style="display: none;">
+                <div id="image-loading" class="loading">Loading image...</div>
+                <img id="cat-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="Random animal" style="display: none;">
                 <div id="image-error" class="error" style="display: none;">
-                    <p>Couldn't load cat image</p>
+                    <p>Couldn't load image</p>
                 </div>
             </div>
             
             <div class="fact-container">
-                <div id="loading" class="loading">Loading cat fact...</div>
+                <div id="loading" class="loading">Loading fact...</div>
                 <div id="fact-display" class="fact-display" style="display: none;">
                     <p id="fact-text"></p>
                 </div>
                 <div id="error" class="error" style="display: none;">
-                    <p>Oops! Couldn't fetch a cat fact. Please try again.</p>
+                    <p>Oops! Couldn't fetch a fact. Please try again.</p>
                 </div>
             </div>
             

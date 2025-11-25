@@ -1,25 +1,30 @@
 // ============================================
-// CATFACT APPLICATION - JAVASCRIPT FILE
+// CAT & DOG FACTS APPLICATION - JAVASCRIPT FILE
 // ============================================
 //
 // GOAL:
-// Create a fun, educational web application that displays random cat facts
-// with matching images to help people learn about cats while enjoying
-// beautiful cat pictures.
+// Create a fun, educational web application that displays random cat and dog facts
+// with matching images to help people learn about animals while enjoying
+// beautiful pictures.
 //
 // SOLUTION PROVIDED:
-// This application solves the problem of finding interesting cat facts and
+// This application solves the problem of finding interesting animal facts and
 // matching images by:
-// 1. Fetching random cat facts from a free API (Meow Facts)
-// 2. Extracting keywords from facts to find relevant images
-// 3. Loading images from multiple sources with fallback options
-// 4. Providing a responsive design that works on all devices
-// 5. Handling errors gracefully so the app always works
+// 1. Fetching random facts from free APIs (Meow Facts for cats, Dog API for dogs)
+// 2. Allowing users to toggle between cat and dog facts
+// 3. Extracting keywords from facts to find relevant images
+// 4. Loading images from multiple sources with fallback options
+// 5. Providing a responsive design that works on all devices
+// 6. Handling errors gracefully so the app always works
 //
 // TECHNOLOGIES USED:
 // - Free APIs (no API key needed):
-//   * Meow Facts API for cat facts
-//   * Cataas and Picsum for cat images
+//   * Meow Facts API (https://meowfacts.herokuapp.com/) for cat facts
+//   * Dog API (https://dogapi.dog) for dog facts
+//   * Cataas for cat images
+//   * Dog CEO API (https://dog.ceo) for dog images
+//   * RandomDog API for dog images
+//   * Picsum Photos for fallback images
 // - JavaScript for functionality
 // - HTML/CSS for display
 //
@@ -33,9 +38,10 @@
 // Example: const myName = "John"; (myName will always be "John")
 // ============================================
 
-// Store the API URL (web address) where we get cat facts from
-// This URL never changes, so we use 'const'
-const FACT_API_URL = 'https://meowfacts.herokuapp.com/';
+// Store the API URLs (web addresses) where we get facts from
+// These URLs never change, so we use 'const'
+const CAT_FACT_API_URL = 'https://meowfacts.herokuapp.com/';
+const DOG_FACT_API_URL = 'https://dogapi.dog/api/v2/facts?limit=1';
 
 // ============================================
 // WHAT IS A FUNCTION?
@@ -184,17 +190,26 @@ function getRandomLocalImage() {
 // We store them in variables so we can use them later
 // ============================================
 
-// Get elements related to the cat fact (text)
+// Get elements related to the fact (text)
 const loadingEl = document.getElementById('loading');           // The "Loading..." message
 const factDisplayEl = document.getElementById('fact-display');  // The box that shows the fact
 const factTextEl = document.getElementById('fact-text');         // The text inside the fact box
 const errorEl = document.getElementById('error');                // The error message box
 const newFactBtn = document.getElementById('new-fact-btn');      // The button to get new facts
 
-// Get elements related to the cat image
+// Get elements related to the image
 const imageLoadingEl = document.getElementById('image-loading'); // The "Loading image..." message
-const catImageEl = document.getElementById('cat-image');       // The <img> tag that shows the cat
+const catImageEl = document.getElementById('cat-image');       // The <img> tag that shows the animal
 const imageErrorEl = document.getElementById('image-error');     // The error message for images
+
+// Get elements for animal toggle
+const toggleAnimalBtn = document.getElementById('toggle-animal'); // Button to switch between cat/dog
+const toggleText = document.getElementById('toggle-text');         // Text inside toggle button
+const headerTitle = document.getElementById('header-title');        // Main title (🐱 Cat Facts)
+const headerSubtitle = document.getElementById('header-subtitle'); // Subtitle text
+
+// Track current animal type (cat or dog)
+let currentAnimalType = 'cat'; // Start with cats
 
 // ============================================
 // HOW TO REQUEST IMAGES FROM THE INTERNET
@@ -205,7 +220,14 @@ const imageErrorEl = document.getElementById('image-error');     // The error me
 // Step 4: If one image fails, we try the next one (fallback system)
 // ============================================
 
-function fetchCatImage(keywords) {
+// ============================================
+// FUNCTION: Fetch Animal Image (Cat or Dog)
+// ============================================
+// Purpose: Get an image based on animal type and keywords
+// Works for both cats and dogs
+// ============================================
+
+function fetchAnimalImage(keywords, animalType = 'cat') {
     // Show loading message, hide image and any errors
     imageLoadingEl.style.display = 'block';
     catImageEl.style.display = 'none';
@@ -218,12 +240,25 @@ function fetchCatImage(keywords) {
     
     // STEP 1: Create a list of image URLs to try
     // We try multiple sources in case one doesn't work
+    // Different sources for cats vs dogs
     let attempt = 0;
-    const imageSources = [
-        `https://cataas.com/cat?t=${Date.now()}`, // Source 1: Random cat image
-        `https://picsum.photos/seed/${seed}/600/400`, // Source 2: Random photo (based on keywords)
-        `https://cataas.com/cat/gif?t=${Date.now()}` // Source 3: Cat GIF as backup
-    ];
+    let imageSources = [];
+    
+    if (animalType === 'dog') {
+        // Dog image sources
+        imageSources = [
+            `https://dog.ceo/api/breeds/image/random`, // Source 1: Random dog image from Dog CEO API
+            `https://random.dog/woof.json`, // Source 2: Random dog from RandomDog API
+            `https://picsum.photos/seed/${seed}/600/400` // Source 3: Random photo (based on keywords)
+        ];
+    } else {
+        // Cat image sources
+        imageSources = [
+            `https://cataas.com/cat?t=${Date.now()}`, // Source 1: Random cat image
+            `https://picsum.photos/seed/${seed}/600/400`, // Source 2: Random photo (based on keywords)
+            `https://cataas.com/cat/gif?t=${Date.now()}` // Source 3: Cat GIF as backup
+        ];
+    }
     
     // Function to try loading an image
     const tryLoadImage = () => {
@@ -254,8 +289,47 @@ function fetchCatImage(keywords) {
         }
         
         // Get the current image URL to try
-        const imageUrl = imageSources[attempt];
+        let imageUrl = imageSources[attempt];
         console.log(`Attempting to load image from source ${attempt + 1}:`, imageUrl);
+        
+        // STEP 2: Handle different API types
+        // Some APIs return JSON, others return direct images
+        if (animalType === 'dog' && attempt === 0) {
+            // Dog CEO API returns JSON with image URL
+            fetch('https://dog.ceo/api/breeds/image/random')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        catImageEl.src = data.message; // Set image URL from JSON response
+                    } else {
+                        attempt++;
+                        tryLoadImage();
+                    }
+                })
+                .catch(() => {
+                    attempt++;
+                    tryLoadImage();
+                });
+        } else if (animalType === 'dog' && attempt === 1) {
+            // RandomDog API also returns JSON
+            fetch('https://random.dog/woof.json')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        catImageEl.src = data.url; // Set image URL from JSON response
+                    } else {
+                        attempt++;
+                        tryLoadImage();
+                    }
+                })
+                .catch(() => {
+                    attempt++;
+                    tryLoadImage();
+                });
+        } else {
+            // For other sources (cats or fallback), use direct image URL
+            catImageEl.src = imageUrl;
+        }
         
         // STEP 3: When image loads successfully
         catImageEl.onload = () => {
@@ -271,10 +345,6 @@ function fetchCatImage(keywords) {
             attempt++; // Move to next image source
             tryLoadImage(); // Try again with next image
         };
-        
-        // STEP 2: Set the image source - browser automatically downloads it
-        // When you set .src, the browser immediately tries to load the image
-        catImageEl.src = imageUrl;
     };
     
     // Start trying to load images
@@ -293,6 +363,13 @@ function fetchCatImage(keywords) {
 // Step 4: We get the fact text from data.data[0] (first item in the array)
 // ============================================
 
+// ============================================
+// FUNCTION: Fetch Cat Fact from API
+// ============================================
+// Purpose: Get a random cat fact from Meow Facts API
+// JSON Response format: { "data": ["Fact text here"] }
+// ============================================
+
 async function fetchCatFact() {
     try {
         // Show loading message to user
@@ -301,8 +378,7 @@ async function fetchCatFact() {
         errorEl.style.display = 'none';
         
         // STEP 1: Send request to API
-        // fetch() sends a request and gets a response back
-        const response = await fetch(FACT_API_URL);
+        const response = await fetch(CAT_FACT_API_URL);
         
         // Check if the request was successful
         if (!response.ok) {
@@ -310,26 +386,70 @@ async function fetchCatFact() {
         }
         
         // STEP 2: Convert JSON response to JavaScript object
-        // The API sends JSON, we need to convert it to use it in JavaScript
         const data = await response.json();
         // Example: data = { "data": ["Cats sleep 12-16 hours per day."] }
         
         // STEP 3: Get the fact text from the JSON response
-        // data.data[0] means: get the first item from the "data" array
         const factText = data.data[0];
-        // Example: factText = "Cats sleep 12-16 hours per day."
         
         // STEP 4: Display the fact on the webpage
         factTextEl.textContent = factText;
         loadingEl.style.display = 'none';
         factDisplayEl.style.display = 'block';
         
-        // Return the fact text so we can use it to find images
         return factText;
         
     } catch (error) {
-        // If something goes wrong, show error message
         console.error('Error fetching cat fact:', error);
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+        return null;
+    }
+}
+
+// ============================================
+// FUNCTION: Fetch Dog Fact from API
+// ============================================
+// Purpose: Get a random dog fact from Dog API
+// JSON Response format: { "data": [{ "attributes": { "body": "Fact text here" } }] }
+// ============================================
+
+async function fetchDogFact() {
+    try {
+        // Show loading message to user
+        loadingEl.style.display = 'block';
+        factDisplayEl.style.display = 'none';
+        errorEl.style.display = 'none';
+        
+        // STEP 1: Send request to Dog API
+        const response = await fetch(DOG_FACT_API_URL);
+        
+        // Check if the request was successful
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // STEP 2: Convert JSON response to JavaScript object
+        const data = await response.json();
+        // Example: data = { "data": [{ "attributes": { "body": "Dogs have amazing sense of smell." } }] }
+        
+        // STEP 3: Get the fact text from the JSON response
+        // Dog API structure: data.data[0].attributes.body
+        const factText = data.data[0]?.attributes?.body || null;
+        
+        if (!factText) {
+            throw new Error('No fact found in response');
+        }
+        
+        // STEP 4: Display the fact on the webpage
+        factTextEl.textContent = factText;
+        loadingEl.style.display = 'none';
+        factDisplayEl.style.display = 'block';
+        
+        return factText;
+        
+    } catch (error) {
+        console.error('Error fetching dog fact:', error);
         loadingEl.style.display = 'none';
         errorEl.style.display = 'block';
         return null;
@@ -363,40 +483,64 @@ async function fetchCatFact() {
 // ============================================
 
 async function fetchNewContent() {
-    // STEP 1: Get a cat fact from the internet
-    // await means "wait here until this finishes"
-    const factText = await fetchCatFact();
+    // STEP 1: Get a fact from the internet (cat or dog based on currentAnimalType)
+    let factText;
+    if (currentAnimalType === 'dog') {
+        factText = await fetchDogFact();
+    } else {
+        factText = await fetchCatFact();
+    }
     
     // STEP 2: Check if we got a fact successfully
-    // if (factText) means "if factText exists and is not empty"
     if (factText) {
         // STEP 3: Extract important words from the fact
-        // Example: "Cats sleep 12 hours" → "sleep, hours"
         const keywords = extractKeywords(factText);
-        console.log('Extracted keywords:', keywords); // Print to console for debugging
+        console.log('Extracted keywords:', keywords);
         
-        // STEP 4: Get an image using those keywords
-        fetchCatImage(keywords);
+        // STEP 4: Get an image using those keywords and animal type
+        fetchAnimalImage(keywords, currentAnimalType);
     } else {
-        // STEP 5: If getting the fact failed, use "cat" as default
-        // This way we still show an image even if the fact didn't load
-        fetchCatImage('cat');
+        // STEP 5: If getting the fact failed, use default keyword
+        const defaultKeyword = currentAnimalType === 'dog' ? 'dog' : 'cat';
+        fetchAnimalImage(defaultKeyword, currentAnimalType);
     }
+}
+
+// ============================================
+// FUNCTION: Toggle Between Cat and Dog
+// ============================================
+// Purpose: Switch between showing cat facts or dog facts
+// 
+// How it works:
+// 1. Change currentAnimalType variable
+// 2. Update header text and button text
+// 3. Fetch new content for the selected animal
+// ============================================
+
+function toggleAnimal() {
+    // STEP 1: Switch the animal type
+    if (currentAnimalType === 'cat') {
+        currentAnimalType = 'dog';
+        // Update header for dogs
+        headerTitle.textContent = '🐶 Dog Facts';
+        headerSubtitle.textContent = 'Discover amazing facts about dogs!';
+        toggleText.textContent = 'Switch to 🐱 Cat Facts';
+    } else {
+        currentAnimalType = 'cat';
+        // Update header for cats
+        headerTitle.textContent = '🐱 Cat Facts';
+        headerSubtitle.textContent = 'Discover amazing facts about cats!';
+        toggleText.textContent = 'Switch to 🐶 Dog Facts';
+    }
+    
+    // STEP 2: Get new fact and image for the selected animal
+    fetchNewContent();
 }
 
 // ============================================
 // FUNCTION: Handle Screen Orientation
 // ============================================
 // Purpose: Change button appearance based on screen orientation
-// 
-// What is orientation?
-// - Portrait = phone held upright (tall)
-// - Landscape = phone held sideways (wide)
-// 
-// How it works:
-// 1. Check if screen is landscape and small (mobile)
-// 2. If landscape: show only emoji (🐾) on button
-// 3. If portrait: show full text ("Get New Fact & Image 🐾")
 // ============================================
 
 function handleOrientation() {
@@ -478,8 +622,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // STEP 4: Make the button work
     // When user clicks the button, get new fact and image
-    // 'click' = user clicked the button
-    // fetchNewContent = the function to run when clicked
     newFactBtn.addEventListener('click', fetchNewContent);
+    
+    // STEP 5: Make the toggle button work
+    // When user clicks toggle, switch between cat and dog
+    if (toggleAnimalBtn) {
+        toggleAnimalBtn.addEventListener('click', toggleAnimal);
+    }
 });
 
