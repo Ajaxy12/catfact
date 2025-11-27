@@ -43,6 +43,23 @@
 const CAT_FACT_API_URL = 'https://meowfacts.herokuapp.com/';
 const DOG_FACT_API_URL = 'https://dogapi.dog/api/v2/facts?limit=1';
 
+// WHY WE USE fetch() INSTEAD OF $.get/XMLHttpRequest?
+// ---------------------------------------------------
+// JavaScript originally used older helpers like XMLHttpRequest or jQuery's $.get()
+// to perform HTTP GET requests. Modern browsers now support fetch() natively.
+// We use fetch() because:
+// 1. It is built into the browser (no extra libraries needed)
+// 2. It returns a Promise, so we can use async/await for cleaner code
+// 3. It supports all HTTP methods (GET, POST, PUT, DELETE, etc.) with one API
+// 4. It provides better error handling and streaming support
+//
+// When should you use GET vs POST (or others)?
+// - Use GET when you only need to read data (this is what we do for facts/images)
+// - Use POST when you need to send data to the server (e.g., saving favorites)
+// - PUT/PATCH/DELETE are for updating or deleting data
+//
+// In short: fetch() + GET is perfect for pulling public facts from APIs.
+
 // ============================================
 // WHAT IS A FUNCTION?
 // ============================================
