@@ -58,7 +58,14 @@ const DOG_FACT_API_URL = 'https://dogapi.dog/api/v2/facts?limit=1';
 // - Use POST when you need to send data to the server (e.g., saving favorites)
 // - PUT/PATCH/DELETE are for updating or deleting data
 //
-// In short: fetch() + GET is perfect for pulling public facts from APIs.
+// Can we use fetch() and $.get() at the same time? Technically yes—the browser will
+// happily run two HTTP requests in parallel. However, mixing them in the same codebase
+// usually causes confusion (different syntax, different error handling, harder debug).
+// It is best to pick ONE style (modern fetch + async/await) so everyone understands
+// the flow and we avoid duplicate requests by mistake.
+//
+// In short: fetch() + GET is perfect for pulling public facts from APIs. Stick to fetch
+// everywhere unless you must support an ancient browser with no fetch support.
 
 // ============================================
 // WHAT IS A FUNCTION?
